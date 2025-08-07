@@ -2,11 +2,15 @@
   "root": true,
   "parser": "@babel/eslint-parser",
   "parserOptions": {
-    "ecmaVersion": 2020
+    "ecmaVersion": 2020,
+    "babelOptions": {
+      "configFile": false
+    }
   },
   "extends": [
     "eslint:recommended",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "@react-native-community"
   ],
   "plugins": [
     "prettier"
@@ -15,7 +19,8 @@
     "prettier/prettier": [
       "error",
       {
-        "usePrettierrc": true
+        "usePrettierrc": true,
+        "endOfLine": "auto"
       }
     ]
   },

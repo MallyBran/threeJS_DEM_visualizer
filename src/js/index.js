@@ -6,9 +6,6 @@ import {
   PlaneGeometry,
   GridHelper,
   AxesHelper,
-  TextureLoader,
-  MeshLambertMaterial,
-  DoubleSide,
   Mesh,
 } from 'three'; // import min because three.js is not tree-shakable for now
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -17,8 +14,9 @@ import * as Detector from '../js/vendor/Detector';
 // import terrain from '../textures/agri-medium-dem.tif';
 // import mountainImage from '../textures/agri-medium-autumn.jpg';
 
-import terrain from '../textures/agri-small-dem.tif';
-import mountainImage from '../textures/agri-small-autumn.jpg';
+import terrain from '../textures/bystricka_model.tif';
+//import mountainImage from '../textures/agri-small-autumn.jpg';
+import { MeshBasicMaterial } from 'three';
 
 require('../sass/home.sass');
 
@@ -104,7 +102,7 @@ class Application {
     this.controls.enabled = true;
     this.controls.maxDistance = 1500;
     this.controls.minDistance = 0;
-    this.controls.autoRotate = true;
+    this.controls.autoRotate = false;
   }
 
   setupLight() {
@@ -123,31 +121,37 @@ class Application {
         height: tifImage.getHeight(),
       };
 
-      /* 
+      /*  
       The third and fourth parameter are image segments and we are subtracting one from each,
        otherwise our 3D model goes crazy.
        https://github.com/mrdoob/three.js/blob/master/src/geometries/PlaneGeometry.js#L57
        */
+
+      const metersPerPixel = 2; // TODO: get this from the tifImage metadata
       const geometry = new PlaneGeometry(
-        image.width,
-        image.height,
+        image.width * metersPerPixel,
+        image.height * metersPerPixel * -1,
         image.width - 1,
         image.height - 1
       );
+      //geometry.scale(-1, 1, 1);
       const data = await tifImage.readRasters({ interleave: true });
       console.time('parseGeom');
       const arr1 = new Array(geometry.attributes.position.count);
       const arr = arr1.fill(1);
       arr.forEach((a, index) => {
-        geometry.attributes.position.setZ(index, (data[index] / 10) * -1);
+        geometry.attributes.position.setZ(index, (data[index] / 20) * -1); // original divided by 10, but i scaled x and y by 2 so I need to divide by 20 ig
       });
       console.timeEnd('parseGeom');
 
-      const texture = new TextureLoader().load(mountainImage);
-      const material = new MeshLambertMaterial({
-        wireframe: false,
-        side: DoubleSide,
-        map: texture,
+      //const texture = new TextureLoader().load(mountainImage);
+      
+      //white lines for the triangle grid
+      const material = new MeshBasicMaterial({
+        color: 0xffffff,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.6,
       });
 
       const mountain = new Mesh(geometry, material);
